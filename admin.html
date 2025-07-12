@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - รายการสั่งอาหาร</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 30px; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background-color: #f2f2f2; }
+    .summary, .graph { margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <script>
+    const password = prompt("🔐 ใส่รหัสผ่าน:");
+    if (password !== "admin123") {
+      document.body.innerHTML = "<h2>⛔ ไม่มีสิทธิ์เข้าถึง</h2>";
+      throw new Error("Unauthorized");
+    }
+  </script>
+
+  <h2>📋 รายการสั่งอาหาร</h2>
+  <table id="orderTable">
+    <thead>
+      <tr>
+        <th>เวลา</th><th>โต๊ะ</th><th>เมนู</th><th>จำนวน</th><th>หมายเหตุ</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="summary">
+    <h3>📌 ยอดรวมของวันนี้</h3>
+    <ul id="menuSummary"></ul>
+  </div>
+
+  <div class="graph">
+    <h3>📈 กราฟยอดรวมเมนู (วันนี้)</h3>
+    <canvas id="menuChart" height="100"></canvas>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzmQHn267kLfORwy8sFDFBjdDJt-AznaI7oy5MRCeg/dev'; // เปลี่ยน URL
+
+    fetch(scriptURL)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector("#orderTable tbody");
+        const summary = {};
+        const today = new Date().toDateString();
+
+        data.slice(1).forEach(row => {
+          const [timestamp, table, menu, qty, note] = row;
+          const date = new Date(timestamp).toDateString();
+
+          // ใส่ในตาราง
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${timestamp}</td><td>${table}</td><td>${menu}</td><td>${qty}</td><td>${note}</td>`;
+          tbody.appendChild(tr);
+
+          // นับยอดรวมวันนี้
+          if (date === today) {
+            summary[menu] = (summary[menu] || 0) + Number(qty);
+          }
+        });
+
+        // แสดงยอดรวม
+        const ul = document.getElementById("menuSummary");
+        const labels = [], values = [];
+
+        for (let menu in summary) {
+          labels.push(menu);
+          values.push(summary[menu]);
+          const li = document.createElement("li");
+          li.textContent = `${menu}: ${summary[menu]} รายการ`;
+          ul.appendChild(li);
+        }
+
+        // กราฟ Chart.js
+        const ctx = document.getElementById('menuChart');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'ยอดรวม (วันนี้)',
+              data: values,
+              backgroundColor: 'rgba(75, 192, 192, 0.6)'
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      });
+  </script>
+</body>
+</html>

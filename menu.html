@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>สั่งอาหาร</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .menu-item { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h2>🍽 เมนูอาหาร</h2>
+
+  <label>โต๊ะเลขที่: <input type="text" id="table" required></label><br><br>
+
+  <div class="menu-item">
+    <label>เมนู:
+      <select id="menu">
+        <option>ข้าวผัด</option>
+        <option>ผัดไทย</option>
+        <option>ต้มยำกุ้ง</option>
+        <option>ส้มตำ</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="menu-item">
+    <label>จำนวน: <input type="number" id="qty" value="1" min="1"></label>
+  </div>
+
+  <div class="menu-item">
+    <label>หมายเหตุ: <input type="text" id="note"></label>
+  </div>
+
+  <button onclick="sendOrder()">สั่งอาหาร</button>
+
+  <p id="status"></p>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzmQHn267kLfORwy8sFDFBjdDJt-AznaI7oy5MRCeg/dev'; // ใส่ URL จาก Apps Script
+
+    function sendOrder() {
+      const data = {
+        table: document.getElementById("table").value,
+        menu: document.getElementById("menu").value,
+        qty: document.getElementById("qty").value,
+        note: document.getElementById("note").value
+      };
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        document.getElementById("status").innerText = "✅ ส่งรายการเรียบร้อยแล้ว!";
+      })
+      .catch(error => {
+        document.getElementById("status").innerText = "❌ ส่งไม่สำเร็จ!";
+      });
+    }
+  </script>
+</body>
+</html>
