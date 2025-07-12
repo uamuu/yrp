@@ -1,63 +1,299 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>สั่งอาหาร</title>
+  <meta charset="UTF-8" />
+  <title>ระบบสั่งอาหาร</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .menu-item { margin-bottom: 10px; }
+    /* สไตล์มินิมอล */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 400px;
+      margin: 20px auto;
+      padding: 15px;
+      background: #f9f9f9;
+      color: #222;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 7px 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .hidden {
+      display: none;
+    }
+    .status {
+      margin-top: 12px;
+      text-align: center;
+      font-weight: 600;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .order-list {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 8px #ddd;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .nav-buttons button {
+      width: 48%;
+      background-color: #555;
+    }
+    .nav-buttons button.active {
+      background-color: #0077cc;
+    }
   </style>
 </head>
 <body>
-  <h2>🍽 เมนูอาหาร</h2>
 
-  <label>โต๊ะเลขที่: <input type="text" id="table" required></label><br><br>
+  <h2>🍽 ระบบสั่งอาหาร</h2>
 
-  <div class="menu-item">
-    <label>เมนู:
-      <select id="menu">
-        <option>ข้าวผัด</option>
-        <option>ผัดไทย</option>
-        <option>ต้มยำกุ้ง</option>
-        <option>ส้มตำ</option>
-      </select>
-    </label>
+  <!-- กรอกโต๊ะ -->
+  <label for="tableInput">โต๊ะเลขที่</label>
+  <input type="text" id="tableInput" placeholder="กรอกเลขโต๊ะ" />
+
+  <!-- ปุ่มเปลี่ยนหน้า -->
+  <div class="nav-buttons">
+    <button id="btnMainMenu" class="active">เมนูหลัก</button>
+    <button id="btnSnackMenu">อาหารทานเล่น</button>
+    <button id="btnSummary">สรุปออเดอร์</button>
   </div>
 
-  <div class="menu-item">
-    <label>จำนวน: <input type="number" id="qty" value="1" min="1"></label>
-  </div>
+  <!-- หน้าเมนูหลัก -->
+  <section id="mainMenu">
+    <label for="mainMenuSelect">เลือกเมนูหลัก</label>
+    <select id="mainMenuSelect">
+      <option value="ข้าวผัด" data-price="40">ข้าวผัด - 40 บาท</option>
+      <option value="ผัดไทย" data-price="50">ผัดไทย - 50 บาท</option>
+      <option value="ต้มยำกุ้ง" data-price="80">ต้มยำกุ้ง - 80 บาท</option>
+      <option value="ส้มตำ" data-price="45">ส้มตำ - 45 บาท</option>
+    </select>
 
-  <div class="menu-item">
-    <label>หมายเหตุ: <input type="text" id="note"></label>
-  </div>
+    <label for="mainMenuQty">จำนวน</label>
+    <input type="number" id="mainMenuQty" value="1" min="1" />
 
-  <button onclick="sendOrder()">สั่งอาหาร</button>
+    <button id="addMainMenu">➕ เพิ่มเมนูหลัก</button>
+  </section>
 
-  <p id="status"></p>
+  <!-- หน้าอาหารทานเล่น -->
+  <section id="snackMenu" class="hidden">
+    <label for="snackMenuSelect">เลือกอาหารทานเล่น</label>
+    <select id="snackMenuSelect">
+      <option value="ปีกไก่ทอด" data-price="60">ปีกไก่ทอด - 60 บาท</option>
+      <option value="เฟรนช์ฟรายส์" data-price="40">เฟรนช์ฟรายส์ - 40 บาท</option>
+      <option value="ไก่ย่าง" data-price="75">ไก่ย่าง - 75 บาท</option>
+      <option value="แซนด์วิช" data-price="55">แซนด์วิช - 55 บาท</option>
+    </select>
+
+    <label for="snackMenuQty">จำนวน</label>
+    <input type="number" id="snackMenuQty" value="1" min="1" />
+
+    <button id="addSnackMenu">➕ เพิ่มอาหารทานเล่น</button>
+  </section>
+
+  <!-- หน้าสรุปรายการ -->
+  <section id="summary" class="hidden">
+    <h3>รายการสั่งอาหาร</h3>
+    <div class="order-list" id="orderList"></div>
+    <div style="font-weight: 700; margin-top: 10px;">ราคารวม: <span id="totalPrice">0</span> บาท</div>
+    <button id="sendOrderBtn" style="margin-top: 20px;">📤 ส่งออเดอร์</button>
+    <p class="status" id="orderStatus"></p>
+  </section>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzmQHn267kLfORwy8sFDFBjdDJt-AznaI7oy5MRCeg/dev'; // ใส่ URL จาก Apps Script
+    // ตัวแปรเก็บออเดอร์
+    let orders = [];
 
-    function sendOrder() {
-      const data = {
-        table: document.getElementById("table").value,
-        menu: document.getElementById("menu").value,
-        qty: document.getElementById("qty").value,
-        note: document.getElementById("note").value
+    // ปุ่มเปลี่ยนหน้า
+    const btnMainMenu = document.getElementById('btnMainMenu');
+    const btnSnackMenu = document.getElementById('btnSnackMenu');
+    const btnSummary = document.getElementById('btnSummary');
+
+    // ส่วนของหน้า
+    const mainMenuSection = document.getElementById('mainMenu');
+    const snackMenuSection = document.getElementById('snackMenu');
+    const summarySection = document.getElementById('summary');
+
+    // ฟังก์ชันเปลี่ยนหน้า
+    function showSection(section) {
+      mainMenuSection.classList.add('hidden');
+      snackMenuSection.classList.add('hidden');
+      summarySection.classList.add('hidden');
+
+      btnMainMenu.classList.remove('active');
+      btnSnackMenu.classList.remove('active');
+      btnSummary.classList.remove('active');
+
+      if (section === 'main') {
+        mainMenuSection.classList.remove('hidden');
+        btnMainMenu.classList.add('active');
+      } else if (section === 'snack') {
+        snackMenuSection.classList.remove('hidden');
+        btnSnackMenu.classList.add('active');
+      } else if (section === 'summary') {
+        summarySection.classList.remove('hidden');
+        btnSummary.classList.add('active');
+        renderOrderList();
+      }
+    }
+
+    btnMainMenu.onclick = () => showSection('main');
+    btnSnackMenu.onclick = () => showSection('snack');
+    btnSummary.onclick = () => showSection('summary');
+
+    // เพิ่มเมนูหลัก
+    document.getElementById('addMainMenu').onclick = () => {
+      const menuSelect = document.getElementById('mainMenuSelect');
+      const qtyInput = document.getElementById('mainMenuQty');
+      const name = menuSelect.value;
+      const price = Number(menuSelect.selectedOptions[0].dataset.price);
+      const qty = Number(qtyInput.value);
+
+      if (qty < 1) {
+        alert('กรุณากรอกจำนวนอย่างน้อย 1');
+        return;
+      }
+
+      orders.push({ name, price, qty });
+      alert(`เพิ่ม ${name} x${qty} แล้ว`);
+      qtyInput.value = 1;
+    };
+
+    // เพิ่มอาหารทานเล่น
+    document.getElementById('addSnackMenu').onclick = () => {
+      const menuSelect = document.getElementById('snackMenuSelect');
+      const qtyInput = document.getElementById('snackMenuQty');
+      const name = menuSelect.value;
+      const price = Number(menuSelect.selectedOptions[0].dataset.price);
+      const qty = Number(qtyInput.value);
+
+      if (qty < 1) {
+        alert('กรุณากรอกจำนวนอย่างน้อย 1');
+        return;
+      }
+
+      orders.push({ name, price, qty });
+      alert(`เพิ่ม ${name} x${qty} แล้ว`);
+      qtyInput.value = 1;
+    };
+
+    // แสดงรายการออเดอร์
+    function renderOrderList() {
+      const listDiv = document.getElementById('orderList');
+      listDiv.innerHTML = '';
+
+      if (orders.length === 0) {
+        listDiv.innerHTML = '<p>ยังไม่มีรายการสั่งอาหาร</p>';
+        document.getElementById('totalPrice').innerText = '0';
+        return;
+      }
+
+      let total = 0;
+      const ul = document.createElement('ul');
+
+      orders.forEach((item, index) => {
+        const li = document.createElement('li');
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        li.textContent = `${item.name} x${item.qty} = ${itemTotal} บาท `;
+
+        // ปุ่มลบรายการ
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '❌';
+        delBtn.style.marginLeft = '8px';
+        delBtn.style.cursor = 'pointer';
+        delBtn.onclick = () => {
+          orders.splice(index, 1);
+          renderOrderList();
+        };
+
+        li.appendChild(delBtn);
+        ul.appendChild(li);
+      });
+
+      listDiv.appendChild(ul);
+      document.getElementById('totalPrice').innerText = total;
+    }
+
+    // ส่งข้อมูลไป Google Apps Script
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzmQHn267kLfORwy8sFDFBjdDJt-AznaI7oy5MRCeg/dev'; // เปลี่ยนตามจริง
+
+    document.getElementById('sendOrderBtn').onclick = () => {
+      const tableNo = document.getElementById('tableInput').value.trim();
+
+      if (!tableNo) {
+        alert('กรุณากรอกโต๊ะเลขที่ก่อนส่งออเดอร์');
+        return;
+      }
+
+      if (orders.length === 0) {
+        alert('ยังไม่มีรายการอาหารในออเดอร์');
+        return;
+      }
+
+      const payload = {
+        table: tableNo,
+        orders: orders
       };
 
       fetch(scriptURL, {
         method: 'POST',
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       })
-      .then(response => {
-        document.getElementById("status").innerText = "✅ ส่งรายการเรียบร้อยแล้ว!";
+      .then(res => {
+        if (res.ok) {
+          document.getElementById('orderStatus').innerText = '✅ ส่งออเดอร์เรียบร้อยแล้ว!';
+          orders = [];
+          renderOrderList();
+          document.getElementById('tableInput').value = '';
+          showSection('main');
+        } else {
+          document.getElementById('orderStatus').innerText = '❌ เกิดข้อผิดพลาดในการส่งออเดอร์';
+        }
       })
-      .catch(error => {
-        document.getElementById("status").innerText = "❌ ส่งไม่สำเร็จ!";
+      .catch(err => {
+        document.getElementById('orderStatus').innerText = '❌ ไม่สามารถส่งออเดอร์ได้';
+        console.error(err);
       });
-    }
+    };
+
+    // เริ่มต้นแสดงหน้าเมนูหลัก
+    showSection('main');
   </script>
 </body>
 </html>
